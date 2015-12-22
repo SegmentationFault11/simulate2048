@@ -23,16 +23,16 @@ enum Direction {UP, DOWN, LEFT, RIGHT};
 //| 12 | 13 | 14 | 15 |
 //---------------------
 
-class Table {
+class Board {
 public:
   uint64_t board;
   
   unsigned long score;
   
-  unsigned short fill;
+  unsigned fill;
   
   //Constructor
-  Table();
+  Board();
   
   //Add a random tile (2 or 4) to the board
   void inline addTile();
