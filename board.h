@@ -5,8 +5,9 @@
 #include <vector>
 #include <iomanip>
 #include <cstdlib>
-#include <chrono>
 #include <sstream>
+
+#include "rand.cpp"
 
 using namespace std;
 
@@ -41,7 +42,7 @@ public:
   void boardInit();
   
   //Get the current state of the board
-  ostringstream boardState();
+  ostringstream inline boardState();
   
   //Print the board
   void printBoard();
@@ -58,6 +59,9 @@ public:
   
   //Get the current score
   unsigned long getScore();
+  
+  //Generate an ok random number fast
+  unsigned long 
 };
 
 #endif /* Board_hpp */
