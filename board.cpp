@@ -1,13 +1,22 @@
 #include "board.h"
 
-//Set everything to zero, seed random generator with time
-Board::Board() {
-  board = 0;
-  score = 0;
-  fill = 0;
+static inline unsigned sum_board(Board board) {
+  unsigned sum = (board >> 36) +
+                 (board >> 24) & iso_row +
+                 (board >> 12) & iso_row +
+                 board & iso_row;
+  return sum;
 }
 
-void inline
-Board::addTile() {
-  
+static inline Board
+transpose(Board board) {
+  Board temp = board & 0xf0f00f0ff0f00f0fULL;
+  Board temp1 = board & 0x0000f0f00000f0f0ULL;
+  Board temp2 = board & 0x0f0f00000f0f0000ULL;
+  temp = temp | (temp1 << 12) | (temp2 >> 12);
+  Board temp0 = temp & 0xff00ff0000ff00ffULL;
+  temp1 = temp & 0x0011001100000000ULL;
+  temp2 = temp & 0x0000000011001100ULL;
+  return temp0 | (temp1 << 24) | (temp2 >> 24);
 }
+
