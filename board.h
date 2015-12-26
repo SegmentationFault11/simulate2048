@@ -33,6 +33,10 @@ static inline unsigned sum_board(Board board);
 
 static inline Board transpose();
 
+static inline Board swipe(Direction dir, Board board);
+
+static unsigned inline num_empty(Board board);
+
 
 
 #endif /* Board_hpp */

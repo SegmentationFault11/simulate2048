@@ -20,3 +20,33 @@ transpose(Board board) {
   return temp0 | (temp1 << 24) | (temp2 >> 24);
 }
 
+static inline Board
+swipe(Direction dir, Board board) {
+  if (dir == UP) {
+    board = transpose(board);
+  }
+  else if (dir == DOWN) {
+    board = transpose(board);
+    
+  }
+  else if (dir == LEFT) {
+    
+  }
+  else if (dir == RIGHT) {
+    
+  }
+  else {
+    cerr << "Wrong direction" << endl;
+    exit(0);
+  }
+  return board;
+}
+
+static unsigned inline
+num_empty(Board board) {
+  unsigned num = 0;
+  for (int i = 16; i > 0; --i, board >>= 4) {
+    num += ((board & 0xfULL)) ? 0 : 1;
+  }
+  return num;
+}
