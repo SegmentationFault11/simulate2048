@@ -1,7 +1,6 @@
 #include <iostream>
 #include <getopt.h>
 #include "game.h"
-#include "table.h"
 
 int main(int argc, char* argv[]) {
   ios_base::sync_with_stdio(false);
@@ -9,7 +8,7 @@ int main(int argc, char* argv[]) {
   static struct option longopts[] = {
     {"human",    no_argument      , NULL, 'h'},
     {"brute",    no_argument      , NULL, 'b'},
-    {"computer", required_argument, NULL, 'c'},
+    {"computer", no_argument      , NULL, 'c'},
     {0,          0,                 0,     0 }
   };
   
@@ -17,7 +16,7 @@ int main(int argc, char* argv[]) {
   int idx;
   Game game;
   
-  while((c = getopt_long(argc, argv, "hbc:", longopts, &idx)) != -1)
+  while((c = getopt_long(argc, argv, "hbc", longopts, &idx)) != -1)
   {
     switch(c)
     {
@@ -28,7 +27,7 @@ int main(int argc, char* argv[]) {
         game.bruteGame();
         break;
       case 'c':
-        game.automateGame(atoi(optarg));
+        game.automateGame();
         break;
     }
   }

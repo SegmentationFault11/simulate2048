@@ -2,6 +2,7 @@
 
 Game::Game() {
   table.boardInit();
+  
 }
 
 void
@@ -100,21 +101,8 @@ Game::bruteGame() {
 
 
 void
-Game::automateGame(int depth) {
-  Table newTable = table;
-  ostringstream os;
-  bool gameOver = false;
+Game::automateGame() {
+  create_lookup();
   
-  ofstream outFile;
-  string fileName;
-  cout << "Name output file: " << endl;
-  getline(cin, fileName);
-  outFile.open(fileName);
   
-  outFile << table.boardState().str();
-  for (int step = 1; !gameOver; ++step) {
-    if (depth) continue;
-  }
-  
-  outFile.close();
 }

@@ -5,6 +5,7 @@
 #include <sstream>
 #include <fstream>
 #include "table.h"
+#include "board.h"
 
 class Game {
 private:
@@ -21,7 +22,7 @@ public:
   void bruteGame();
   
   //Use more advanced heuristics for the game
-  void automateGame(int depth);
+  void automateGame();
 };
 
 #endif /* game_hpp */
