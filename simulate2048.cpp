@@ -1,6 +1,6 @@
 #include <iostream>
 #include <getopt.h>
-#include "game.h"
+#include "driver.h"
 
 int main(int argc, char* argv[]) {
   ios_base::sync_with_stdio(true);
@@ -14,20 +14,20 @@ int main(int argc, char* argv[]) {
   
   char c;
   int idx;
-  Game game;
+  Driver driver;
   
   while((c = getopt_long(argc, argv, "hbc", longopts, &idx)) != -1)
   {
     switch(c)
     {
       case 'h':
-        game.playGame();
+        driver.playGame();
         break;
       case 'b':
-        game.bruteGame();
+        driver.bruteGame();
         break;
       case 'c':
-        game.automateGame();
+        driver.automateGame();
         break;
     }
   }
