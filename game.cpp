@@ -61,8 +61,8 @@ Game::bruteGame() {
       outFile << table.boardState().str();
       if (table.checkEnd()) {
         outFile << "FINAL SCORE: " << table.score
-                << "\nNumber of steps: " << step
-                << "\nGAMEOVER" << endl;
+        << "\nNumber of steps: " << step
+        << "\nGAMEOVER" << endl;
         return;
       }
     }
@@ -102,13 +102,15 @@ Game::bruteGame() {
 
 void
 Game::automateGame() {
-  create_lookup();
-  Board board = 0x1002000000001001;
+  cout << "automate start" << endl;
+  Board board;
+  cout << "board created" << endl;
+  board.set_board(0x1002000000001001ULL);
   
-  print_board(board);
+  board.print_board();
   
-  board = swipe(LEFT, board);
+  board.board = board.swipe(RIGHT, board.board);
   
-  print_board(board);
+  board.print_board();
   
 }

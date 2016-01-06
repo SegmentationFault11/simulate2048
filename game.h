@@ -1,11 +1,13 @@
-#ifndef game_hpp
-#define game_hpp
+#ifndef game_h
+#define game_h
 
-#include <stdio.h>
+#include <iostream>
 #include <sstream>
 #include <fstream>
 #include "table.h"
 #include "board.h"
+
+using namespace std;
 
 class Game {
 private:
