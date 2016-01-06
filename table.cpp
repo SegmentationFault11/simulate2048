@@ -68,9 +68,9 @@ Table::setTile(int row, int column, int val) {
 
 //Try not to read this horribly writting function
 bool
-Table::swipe(Direction dir) {
+Table::swipe(int dir) {
   bool changed = false;
-  if (dir == UP) {
+  if (dir == 0) {
     for (int i = 0; i < 4; ++i) {
       if (board[i] == 0 && board[i + 4] == 0 && board[i + 8] == 0 && board[i + 12] == 0) continue;
       
@@ -123,7 +123,7 @@ Table::swipe(Direction dir) {
       }
     }
   }
-  if (dir == DOWN) {
+  if (dir == 1) {
     for (int i = 12; i < 16; ++i) {
       if (board[i] == 0 && board[i - 4] == 0 && board[i - 8] == 0 && board[i - 12] == 0) continue;
       
@@ -177,7 +177,7 @@ Table::swipe(Direction dir) {
       }
     }
   }
-  if (dir == LEFT) {
+  if (dir == 2) {
     for (int i = 0; i < 13; i += 4) {
       if (board[i] == 0 && board[i + 1] == 0 && board[i + 2] == 0 && board[i + 3] == 0) continue;
       
@@ -230,7 +230,7 @@ Table::swipe(Direction dir) {
       }
     }
   }
-  if (dir == RIGHT) {
+  if (dir == 3) {
     for (int i = 3; i < 16; i += 4) {
       if (board[i] == 0 && board[i - 1] == 0 && board[i - 2] == 0 && board[i - 3] == 0) continue;
       

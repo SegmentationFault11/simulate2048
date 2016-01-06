@@ -16,24 +16,27 @@ typedef uint16_t Row;
 
 typedef enum direction_t {UP, DOWN, LEFT, RIGHT} Direction;
 
-static const iso_row = 0x000000000000ffff;
-static const iso_col = 0x000f000f000f000f;
+static const Row iso_row   = 0xffff;
+static const Board iso_col = 0x000f000f000f000f;
+static const Row iso_tile  = 0x000f;
 
-static row_t   collapseLeft [0x10000];
-static row_t   collapseRight[0x10000];
-static board_t collapseUp   [0x10000];
-static board_t collapseDown [0x10000];
+static Row   collapseLeft [0x10000];
+static Row   collapseRight[0x10000];
+static Board collapseUp   [0x10000];
+static Board collapseDown [0x10000];
 
 
-static void create_lookup();
+void create_lookup();
 
-static inline unsigned sum_board(Board board);
+inline void print_board(Board board);
 
-static inline Board transpose();
+inline unsigned sum_board(Board board);
 
-static inline Board swipe(Direction dir, Board board);
+inline Board transpose();
 
-static unsigned inline num_empty(Board board);
+inline Board swipe(Direction dir, Board board);
+
+unsigned inline num_empty(Board board);
 
 
 //If board == 0x123456789abcdef

@@ -3,7 +3,7 @@
 #include "game.h"
 
 int main(int argc, char* argv[]) {
-  ios_base::sync_with_stdio(false);
+  ios_base::sync_with_stdio(true);
   
   static struct option longopts[] = {
     {"human",    no_argument      , NULL, 'h'},

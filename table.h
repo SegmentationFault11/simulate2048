@@ -9,9 +9,9 @@
 #include <chrono>
 #include <sstream>
 
+
 using namespace std;
 
-enum Direction {UP, DOWN, LEFT, RIGHT};
 
 //TABLE:
 //---------------------
@@ -52,7 +52,7 @@ public:
   void setTile(int row, int column, int val);
   
   //Simulates the swiping
-  bool swipe(Direction dir);
+  bool swipe(int dir);
   
   //Check if it's game over
   bool checkEnd();

@@ -103,6 +103,12 @@ Game::bruteGame() {
 void
 Game::automateGame() {
   create_lookup();
+  Board board = 0x1002000000001001;
   
+  print_board(board);
+  
+  board = swipe(LEFT, board);
+  
+  print_board(board);
   
 }
