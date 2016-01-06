@@ -102,14 +102,14 @@ Game::bruteGame() {
 
 void
 Game::automateGame() {
-  cout << "automate start" << endl;
+  
   Board board;
-  cout << "board created" << endl;
+  
   board.set_board(0x1002000000001001ULL);
   
   board.print_board();
   
-  board.board = board.swipe(RIGHT, board.board);
+  board.board = board.swipe(DOWN, board.board);
   
   board.print_board();
   

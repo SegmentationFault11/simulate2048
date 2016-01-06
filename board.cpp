@@ -1,14 +1,12 @@
 #include "board.h"
 
 Board::Board() {
-  unsigned tile[4];
+  board_t tile[4];
   for (row_t val = 0; val < UINT16_MAX; ++val) {
     tile[0] = val & iso_tile;
     tile[1] = (val >> 4)  & iso_tile;
     tile[2] = (val >> 8)  & iso_tile;
     tile[3] = (val >> 12) & iso_tile;
-    
-    //cout << "strt " << val << endl;
     
     for (int i = 0; i < 3; ++i) {
       int j;
@@ -30,19 +28,12 @@ Board::Board() {
       }
     }
     
-    //cout << "mid " << val << endl;
-    
-    row_t collapse_left  = tile[0] + (tile [1] << 4) + (tile [2] << 8) + (tile [3] << 12);
-    row_t collapse_right = tile[3] + (tile [2] << 4) + (tile [1] << 8) + (tile [0] << 12);
-    
     row_t rev_val = (val >> 12) + ((val >> 4) & 0x00F0) + ((val << 4) & 0x0F00) + (val << 12);
     
-    this->collapseLeft [val    ] = collapse_left;
-    this->collapseRight[rev_val] = collapse_right;
-    this->collapseUp   [val    ] = (val | (val << 12ULL) | (tmp << 24ULL) | (tmp << 36ULL)) & COL_MASK;
-    this->collapseDown [rev_val] =
-    
-    //cout << "finn " << val << endl;
+    this->collapseLeft [val    ] = (tile[0] << 0) + (tile[1] << 4) + (tile[2] << 8) + (tile[3] << 12);
+    this->collapseRight[rev_val] = (tile[3] << 0) + (tile[2] << 4) + (tile[1] << 8) + (tile[0] << 12);
+    this->collapseUp   [val    ] = (tile[0] << 0) + (tile[1] << 16) + (tile[2] << 32) + (tile[3] << 48);
+    this->collapseDown [rev_val] = (tile[3] << 0) + (tile[2] << 16) + (tile[1] << 32) + (tile[0] << 48);
   }
 }
 
@@ -63,7 +54,6 @@ Board::print_board() {
 
 void
 Board::print_board(board_t board) {
-  cout << board << endl;
   cout << "-------------------------\n";
   for (int i = 0; i < 4; ++i) {
     for (int j = 0; j < 4; ++j) {
@@ -77,8 +67,8 @@ Board::print_board(board_t board) {
 
 board_t
 Board::transpose(board_t board) {
-  board_t temp = (board & 0xf0f00f0ff0f00f0f) | ((board & 0x0000f0f00000f0f0) << 12) | ((board & 0x0f0f00000f0f0000) >> 12);
-  return (temp & 0xff00ff0000ff00ff) | ((temp & 0x0011001100000000) << 24) | ((temp & 0x0000000011001100) >> 24);
+  board_t temp = (board & 0xf0f00f0ff0f00f0fULL) | ((board & 0x0000f0f00000f0f0ULL) << 12) | ((board & 0x0f0f00000f0f0000ULL) >> 12);
+  return (temp & 0xff00ff0000ff00ffULL) | ((temp & 0x00ff00ff00000000ULL) >> 24) | ((temp & 0x00000000ff00ff00ULL) << 24);
 }
 
 unsigned
@@ -92,18 +82,34 @@ Board::sum_board() {
 
 unsigned
 Board::get_max_tile() {
-  unsigned max = 0;
-  return max;
+  board_t board = this->board;
+  int max = 0;
+  while (board) {
+    max = std::max(max, int(board & iso_tile));
+    board >>= 4;
+  }
+  return 1 << max;
 }
 
 board_t
 Board::swipe(Direction dir, board_t board) {
   if (dir == UP) {
-    board_t new_board = transpose(board);
+    board_t new_board = 0;
+    board_t tran_board = transpose(board);
+    print_board(new_board);
+    new_board += board_t(this->collapseUp[tran_board & iso_row]);
+    new_board += board_t(this->collapseUp[(tran_board >> 16) & iso_row]) << 4;
+    new_board += board_t(this->collapseUp[(tran_board >> 32) & iso_row]) << 8;
+    new_board += board_t(this->collapseUp[(tran_board >> 48) & iso_row]) << 12;
     return new_board;
   }
   else if (dir == DOWN) {
-    board_t new_board = transpose(board);
+    board_t new_board = 0;
+    board_t tran_board = transpose(board);
+    new_board += board_t(this->collapseDown[tran_board & iso_row]);
+    new_board += board_t(this->collapseDown[(tran_board >> 16) & iso_row]) << 4;
+    new_board += board_t(this->collapseDown[(tran_board >> 32) & iso_row]) << 8;
+    new_board += board_t(this->collapseDown[(tran_board >> 48) & iso_row]) << 12;
     return new_board;
     
   }
@@ -134,7 +140,7 @@ unsigned
 Board::num_empty(board_t board) {
   unsigned num = 0;
   for (int i = 16; i > 0; --i, board >>= 4) {
-    num += ((board & 0xfULL)) ? 0 : 1;
+    num += ((board & iso_tile)) ? 0 : 1;
   }
   return num;
 }
@@ -189,8 +195,8 @@ Board::num_empty(board_t board) {
 //        tile[i + 3] = 0;
 //      }
 //    }
-//    Row collapse_left  = tile[0] + (tile [1] << 4) + (tile [2] << 8) + (tile [3] << 12);
-//    Row collapse_right = tile[3] + (tile [2] << 4) + (tile [1] << 8) + (tile [0] << 12);
+//    Row collapse_left  = tile[0] + (tile[1] << 4) + (tile[2] << 8) + (tile[3] << 12);
+//    Row collapse_right = tile[3] + (tile[2] << 4) + (tile[1] << 8) + (tile[0] << 12);
 //    
 //    unsigned rev_val = (val >> 12) | ((val >> 4) & 0x00F0)  | ((val << 4) & 0x0F00) | (val << 12);
 //    
