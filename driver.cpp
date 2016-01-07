@@ -102,12 +102,6 @@ Driver::bruteGame() {
 
 void
 Driver::automateGame() {
-  game.set_board(0x100200000f001001ULL);
-  
-  game.print_board();
-  
-  game.board = game.swipe(DOWN, game.board);
-  
-  game.print_board();
+  game.run();
   
 }
