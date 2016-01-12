@@ -55,16 +55,21 @@ Game::print_board() {
 
 inline void
 Game::print_board(board_t board) {
-  cout << "Score = " << this->score << endl;
-  cout << "-------------------------\n";
+  ostringstream curr;
+  curr << "Score = " << this->score << endl;
+  curr << "-------------------------\n";
   for (int i = 0; i < 4; ++i) {
     for (int j = 0; j < 4; ++j) {
       int idx = (i*4 + j)*4;
-      if ((board >> idx) & iso_tile) cout << "|" << left << setw(5) << setfill(' ') << (1 << ((board >> idx) & iso_tile));
-      else cout << "|" << left << setw(5) << setfill(' ') << " ";
-      if (j == 3) cout << "|\n-------------------------\n";
+      if ((board >> idx) & iso_tile) curr << "|" << left << setw(5) << setfill(' ') << (1 << ((board >> idx) & iso_tile));
+      else curr << "|" << left << setw(5) << setfill(' ') << " ";
+      if (j == 3) curr << "|\n-------------------------\n";
     }
   }
+#ifndef -OUTCOMMAND
+  cout << curr.str();
+#endif
+  os << curr.str();
 }
 
 inline board_t
@@ -194,13 +199,21 @@ Game::Human() {
 }
 
 void
-Game::BruteAi() {
+Game::BruteAI() {
   
 }
 
 void
 Game::AI() {
   init_board();
+ 
+  while (!game_over()) {
+    board = get_best_move(this->board);
+    
+    insert_rand();
+    print_board();
+  }  
   
-  
+  printf("GAME OVER!!\nFinal Score: %d, Max Tile: %d\n", this->score, get_max_tile());
+  print_board();  
 }

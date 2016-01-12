@@ -1,11 +1,12 @@
 #include <iostream>
 #include <getopt.h>
-#include "driver.h"
+#include "game.h"
 
 int main(int argc, char* argv[]) {
   ios_base::sync_with_stdio(true);
   
   static struct option longopts[] = {
+    {"test",     no_argument      , NULL, 't'},
     {"human",    no_argument      , NULL, 'h'},
     {"brute",    no_argument      , NULL, 'b'},
     {"computer", no_argument      , NULL, 'c'},
@@ -14,20 +15,23 @@ int main(int argc, char* argv[]) {
   
   char c;
   int idx;
-  Driver driver;
+  Game game;
   
   while((c = getopt_long(argc, argv, "hbc", longopts, &idx)) != -1)
   {
     switch(c)
     {
+      case 't':
+        game.Test();
+        break;
       case 'h':
-        driver.playGame();
+        game.Human();
         break;
       case 'b':
-        driver.bruteGame();
+        game.BruteAI();
         break;
       case 'c':
-        driver.automateGame();
+        game.AI();
         break;
     }
   }

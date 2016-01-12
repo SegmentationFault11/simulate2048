@@ -29,6 +29,9 @@ private:
   row_t   collapseRight[0x10000];
   board_t collapseUp   [0x10000];
   board_t collapseDown [0x10000];
+  
+//----------------------OUTPUT STREAM----------------------
+  ostringstream os;
  
 public:
 //------------------------VARIABLES------------------------
@@ -68,7 +71,7 @@ public:
   
   void Human();
   
-  void BruteAi();
+  void BruteAI();
   
   void AI();
 };
