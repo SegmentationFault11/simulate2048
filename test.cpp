@@ -113,7 +113,7 @@ static inline board_t unpack_col(row_t row) {
 }
 
 static inline row_t reverse_row(row_t row) {
-    return (row >> 12) | ((row >> 4) & 0x00F0)  | ((row << 4) & 0x0F00) | (row << 12);
+    return (row >> 12) | ((row >> 4) & 0x00F0) | ((row << 4) & 0x0F00) | (row << 12);
 }
 
 void init_tables() {

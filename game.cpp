@@ -161,9 +161,20 @@ Game::insert_rand() {
   return true;
 }
 
+inline bool
+Game::game_over() {
+  if (board == swipe(UP, board) &&
+      board == swipe(DOWN, board) &&
+      board == swipe(LEFT, board) &&
+      board == swipe(RIGHT, board)) {
+    return true;
+  }
+  else return false;
+}
+
 
 void
-Game::AI() {
+Game::Test() {
   set_board(0x100200000f001001ULL);
   
   print_board();
@@ -171,4 +182,25 @@ Game::AI() {
   this->board = swipe(DOWN, this->board);
   
   print_board();
+  
+  insert_rand();
+  
+  print_board();
+}
+
+void
+Game::Human() {
+  
+}
+
+void
+Game::BruteAi() {
+  
+}
+
+void
+Game::AI() {
+  init_board();
+  
+  
 }

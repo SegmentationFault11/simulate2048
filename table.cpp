@@ -5,7 +5,7 @@ Table::Table() {
   fill = 0;
   board.resize(16);
   for (int i = 0; i < 16; ++i) board[i] = 0;
-  srand((int)time(0));
+  srand((int)time(NULL));
 }
 
 void inline

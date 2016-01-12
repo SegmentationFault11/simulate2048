@@ -102,6 +102,5 @@ Driver::bruteGame() {
 
 void
 Driver::automateGame() {
-  game.run();
-  
+  game.AI();
 }

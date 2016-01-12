@@ -60,8 +60,12 @@ public:
   unsigned num_empty(board_t board);
   
   bool insert_rand();
+  
+  bool game_over();
 
 //------------------------SIMULATORS------------------------
+  void Test();
+  
   void Human();
   
   void BruteAi();
