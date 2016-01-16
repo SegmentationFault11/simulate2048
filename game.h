@@ -26,7 +26,7 @@ static const row_t iso_tile  = 0x000f;
 class Game {
 private:
 //----------------------LOOKUP TABLES----------------------
-  unsigned score_row    [0x10000];
+  board_t  score_row    [0x10000];
   row_t    collapseLeft [0x10000];
   row_t    collapseRight[0x10000];
   board_t  collapseUp   [0x10000];
@@ -39,6 +39,7 @@ public:
 //------------------------VARIABLES------------------------
   board_t board = 0;
   unsigned score_pen = 0;
+  unsigned num_moves = 0;
   
 //----------------------CONSTRUCTORS-----------------------
   Game();
@@ -60,7 +61,7 @@ public:
   
   unsigned get_max_tile();
   
-  unsigned get_score();
+  board_t get_score();
   
   board_t swipe(Direction dir, board_t board);
   
