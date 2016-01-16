@@ -10,6 +10,9 @@ Game::Game() {
     tile[2] = (val >> 8)  & iso_tile;
     tile[3] = (val >> 12) & iso_tile;
     
+    for (int i = 0; i < 4; ++i)
+      if (tile[i] > 1) score_row[val] += (tile[i] - 1)*(1 << tile[i]);
+    
     for (int i = 0; i < 3; ++i) {
       int j = 0;
       
@@ -27,9 +30,6 @@ Game::Game() {
         tile[j] = 0;
       }
     }
-    
-    for (int i = 0; i < 4; ++i)
-      if (tile[i] > 1) score_row[val] += (tile[i] - 1)*(1 << tile[i]);
     
     row_t rev_val = (val >> 12) + ((val >> 4) & 0x00F0) + ((val << 4) & 0x0F00) + (val << 12);
     
@@ -103,7 +103,6 @@ Game::get_max_tile() {
 
 inline unsigned
 Game::get_score() {
-  cout << "scorepen = " << this->score_pen << endl;
   return score_row[(this->board >>  0) & iso_row] +
          score_row[(this->board >> 16) & iso_row] +
          score_row[(this->board >> 32) & iso_row] +
