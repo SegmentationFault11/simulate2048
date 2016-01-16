@@ -24,8 +24,6 @@ Table::addTile() {
   while (board[position]);
   board[position] = value;
   ++fill;
-
-  
 }
 
 

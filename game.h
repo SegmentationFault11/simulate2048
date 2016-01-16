@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <algorithm>
+#include <fstream>
 
 
 using namespace std;
@@ -25,10 +26,11 @@ static const row_t iso_tile  = 0x000f;
 class Game {
 private:
 //----------------------LOOKUP TABLES----------------------
-  row_t   collapseLeft [0x10000];
-  row_t   collapseRight[0x10000];
-  board_t collapseUp   [0x10000];
-  board_t collapseDown [0x10000];
+  unsigned score_row    [0x10000];
+  row_t    collapseLeft [0x10000];
+  row_t    collapseRight[0x10000];
+  board_t  collapseUp   [0x10000];
+  board_t  collapseDown [0x10000];
   
 //----------------------OUTPUT STREAM----------------------
   ostringstream os;
@@ -36,7 +38,7 @@ private:
 public:
 //------------------------VARIABLES------------------------
   board_t board = 0;
-  unsigned score = 0;
+  unsigned score_pen = 0;
   
 //----------------------CONSTRUCTORS-----------------------
   Game();
@@ -58,6 +60,8 @@ public:
   
   unsigned get_max_tile();
   
+  unsigned get_score();
+  
   board_t swipe(Direction dir, board_t board);
   
   unsigned num_empty(board_t board);
@@ -74,5 +78,8 @@ public:
   void BruteAI();
   
   void AI();
+
+//------------------------SIMULATORS------------------------
+	Direction get_best_move(board_t board);
 };
 #endif

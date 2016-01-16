@@ -3,7 +3,7 @@
 #include "game.h"
 
 int main(int argc, char* argv[]) {
-  ios_base::sync_with_stdio(true);
+  ios_base::sync_with_stdio(false);
   
   static struct option longopts[] = {
     {"test",     no_argument      , NULL, 't'},
@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
   int idx;
   Game game;
   
-  while((c = getopt_long(argc, argv, "hbc", longopts, &idx)) != -1)
+  while((c = getopt_long(argc, argv, "hbct", longopts, &idx)) != -1)
   {
     switch(c)
     {
