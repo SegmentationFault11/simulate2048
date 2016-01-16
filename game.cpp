@@ -214,7 +214,7 @@ Game::Test() {
 
 void
 Game::Human() {
-  init_board();t
+  init_board();
   
   char input = '0';
   ofstream outFile;
