@@ -336,7 +336,7 @@ Direction
 Game::get_move(board_t current_board) {
   Direction best_move = UP;
   
-  unsigned depth = std::max(num_unique(), 3);
+  unsigned depth = std::min(std::max(num_unique(), 3), 9);
   
   double up_score    = score_swipe(UP, current_board, depth);
   double down_score  = score_swipe(DOWN, current_board, depth);
