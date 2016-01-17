@@ -9,6 +9,7 @@
 #include <sstream>
 #include <algorithm>
 #include <fstream>
+#include <bitset>
 
 
 using namespace std;
@@ -34,11 +35,16 @@ private:
   
 //----------------------OUTPUT STREAM----------------------
   ostringstream os;
+  
+//--------------------RUNTIME VARIABLES--------------------
+  unsigned search_depth  = 3;
+  unsigned current_depth = 0;
  
 public:
 //------------------------VARIABLES------------------------
   board_t board = 0;
   unsigned score_pen = 0;
+  unsigned moves = 0;
   
 //----------------------CONSTRUCTORS-----------------------
   Game();
@@ -48,13 +54,13 @@ public:
 //--------------------BOARD OPERATIONS---------------------
   void init_board();
   
-  void set_board(board_t board);
+  void set_board(board_t current_board);
   
   void print_board();
   
-  void print_board(board_t board);
+  void print_board(board_t current_board);
   
-  board_t transpose(board_t board);
+  board_t transpose(board_t current_board);
   
   unsigned sum_board();
   
@@ -62,13 +68,17 @@ public:
   
   unsigned get_score();
   
-  board_t swipe(Direction dir, board_t board);
+  int num_unique();
   
-  unsigned num_empty(board_t board);
+  board_t swipe(Direction dir, board_t current_board);
+  
+  unsigned num_empty(board_t current_board);
   
   bool insert_rand();
   
   bool game_over();
+  
+  void print_fin();
 
 //------------------------SIMULATORS------------------------
   void Test();
@@ -80,6 +90,9 @@ public:
   void AI();
 
 //------------------------SIMULATORS------------------------
-	Direction get_best_move(board_t board);
+	Direction get_move(board_t current_board);
+  
+  double score_swipe(Direction dir, board_t current_board, int depth);
+  
 };
 #endif

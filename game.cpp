@@ -47,8 +47,8 @@ Game::init_board() {
 }
 
 inline void
-Game::set_board(board_t board) {
-  this->board = board;
+Game::set_board(board_t current_board) {
+  this->board = current_board;
 }
 
 inline void
@@ -57,14 +57,16 @@ Game::print_board() {
 }
 
 inline void
-Game::print_board(board_t board) {
+Game::print_board(board_t current_board) {
   ostringstream curr;
   curr << "Score = " << get_score() << endl;
   curr << "-------------------------\n";
   for (int i = 0; i < 4; ++i) {
     for (int j = 0; j < 4; ++j) {
       int idx = (i*4 + j)*4;
-      if ((board >> idx) & iso_tile) curr << "|" << left << setw(5) << setfill(' ') << (1 << ((board >> idx) & iso_tile));
+      if ((current_board >> idx) & iso_tile)
+        curr << "|" << left << setw(5) << setfill(' ')
+             << (1 << ((current_board >> idx) & iso_tile));
       else curr << "|" << left << setw(5) << setfill(' ') << " ";
       if (j == 3) curr << "|\n-------------------------\n";
     }
@@ -76,9 +78,13 @@ Game::print_board(board_t board) {
 }
 
 inline board_t
-Game::transpose(board_t board) {
-  board_t temp = (board & 0xf0f00f0ff0f00f0fULL) | ((board & 0x0000f0f00000f0f0ULL) << 12) | ((board & 0x0f0f00000f0f0000ULL) >> 12);
-  return (temp & 0xff00ff0000ff00ffULL) | ((temp & 0x00ff00ff00000000ULL) >> 24) | ((temp & 0x00000000ff00ff00ULL) << 24);
+Game::transpose(board_t current_board) {
+  board_t temp = (current_board & 0xf0f00f0ff0f00f0fULL) |
+                 ((current_board & 0x0000f0f00000f0f0ULL) << 12) |
+                 ((current_board & 0x0f0f00000f0f0000ULL) >> 12);
+  return (temp & 0xff00ff0000ff00ffULL) |
+         ((temp & 0x00ff00ff00000000ULL) >> 24) |
+         ((temp & 0x00000000ff00ff00ULL) << 24);
 }
 
 inline unsigned
@@ -92,11 +98,11 @@ Game::sum_board() {
 
 inline unsigned
 Game::get_max_tile() {
-  board_t board = this->board;
+  board_t current_board = this->board;
   int max = 0;
-  while (board) {
-    max = std::max(max, int(board & iso_tile));
-    board >>= 4;
+  while (current_board) {
+    max = std::max(max, int(current_board & iso_tile));
+    current_board >>= 4;
   }
   return 1 << max;
 }
@@ -110,11 +116,22 @@ Game::get_score() {
          this->score_pen;
 }
 
+int
+Game::num_unique() {
+  uint16_t present = 0;
+  for (board_t current_board = this->board; current_board; current_board >>= 4)
+    present |= 1 << (current_board & iso_tile);
+  
+  int count;
+  for (count = 0; present; ++count) present &= present - 1;
+  return --count;
+}
+
 inline board_t
-Game::swipe(Direction dir, board_t board) {
+Game::swipe(Direction dir, board_t current_board) {
   if (dir == UP) {
     board_t new_board = 0;
-    board_t tran_board = transpose(board);
+    board_t tran_board = transpose(current_board);
     new_board += board_t(this->collapseUp[tran_board & iso_row]);
     new_board += board_t(this->collapseUp[(tran_board >> 16) & iso_row]) << 4;
     new_board += board_t(this->collapseUp[(tran_board >> 32) & iso_row]) << 8;
@@ -123,7 +140,7 @@ Game::swipe(Direction dir, board_t board) {
   }
   else if (dir == DOWN) {
     board_t new_board = 0;
-    board_t tran_board = transpose(board);
+    board_t tran_board = transpose(current_board);
     new_board += board_t(this->collapseDown[tran_board & iso_row]);
     new_board += board_t(this->collapseDown[(tran_board >> 16) & iso_row]) << 4;
     new_board += board_t(this->collapseDown[(tran_board >> 32) & iso_row]) << 8;
@@ -133,19 +150,19 @@ Game::swipe(Direction dir, board_t board) {
   }
   else if (dir == LEFT) {
     board_t new_board = 0;
-    new_board += board_t(this->collapseLeft[board & iso_row]);
-    new_board += board_t(this->collapseLeft[(board >> 16) & iso_row]) << 16;
-    new_board += board_t(this->collapseLeft[(board >> 32) & iso_row]) << 32;
-    new_board += board_t(this->collapseLeft[(board >> 48) & iso_row]) << 48;
+    new_board += board_t(this->collapseLeft[current_board & iso_row]);
+    new_board += board_t(this->collapseLeft[(current_board >> 16) & iso_row]) << 16;
+    new_board += board_t(this->collapseLeft[(current_board >> 32) & iso_row]) << 32;
+    new_board += board_t(this->collapseLeft[(current_board >> 48) & iso_row]) << 48;
     return new_board;
     
   }
   else if (dir == RIGHT) {
     board_t new_board = 0;
-    new_board += board_t(this->collapseRight[board & iso_row]);
-    new_board += board_t(this->collapseRight[(board >> 16) & iso_row]) << 16;
-    new_board += board_t(this->collapseRight[(board >> 32) & iso_row]) << 32;
-    new_board += board_t(this->collapseRight[(board >> 48) & iso_row]) << 48;
+    new_board += board_t(this->collapseRight[current_board & iso_row]);
+    new_board += board_t(this->collapseRight[(current_board >> 16) & iso_row]) << 16;
+    new_board += board_t(this->collapseRight[(current_board >> 32) & iso_row]) << 32;
+    new_board += board_t(this->collapseRight[(current_board >> 48) & iso_row]) << 48;
     return new_board;
   }
   else {
@@ -155,9 +172,9 @@ Game::swipe(Direction dir, board_t board) {
 }
 
 inline unsigned
-Game::num_empty(board_t board) {
+Game::num_empty(board_t current_board) {
   unsigned num = 0;
-  for (int i = 0; i < 16; ++i, board >>= 4) num += ((board & iso_tile)) ? 0 : 1;
+  for (int i = 0; i < 16; ++i, current_board >>= 4) num += ((current_board & iso_tile)) ? 0 : 1;
   return num;
 }
 
@@ -188,27 +205,24 @@ Game::game_over() {
   else return false;
 }
 
+inline void
+Game::print_fin() {
+  os << "\n\n!!GAME OVER!!\nFinal Score: " << get_score() << "\nMax Tile: "
+     << get_max_tile() << "\nIn " << this->moves << " moves\n";
+#ifdef OUT
+  cout << "\n\n!!GAME OVER!!\nFinal Score: " << get_score() << "\nMax Tile: "
+       << get_max_tile() << "\nIn " << this->moves << " moves\n";
+#endif
+  print_board();
+}
 
 void
 Game::Test() {
-//  set_board(0x100200000f001001ULL);
-//
-//  print_board();
-//  
-//  this->board = swipe(UP, this->board);
-//  
-//  print_board();
-//  
-//  insert_rand();
-//  
-  //  print_board();
-  insert_rand();
-  insert_rand();
-  insert_rand();
-  insert_rand();
-  insert_rand();
-  insert_rand();
-  insert_rand();
+  set_board(0x0001020040005000);
+  
+  print_board();
+  
+  cout << "num unique " << num_unique() << endl;
 }
 
 void
@@ -252,14 +266,11 @@ Game::Human() {
       continue;
     }
     
+    ++this->moves;
     insert_rand();
   }
   
-  os << "GAME OVER!!\nFinal Score: " << get_score() << ", Max Tile: " << get_max_tile() << "\n";
-#ifdef OUT
-  cout << "GAME OVER!!\nFinal Score: " << get_score() << ", Max Tile: " << get_max_tile() << "\n";
-#endif
-  print_board();
+  print_fin();
   
   outFile << os.str() << flush;
   outFile.close();
@@ -267,32 +278,83 @@ Game::Human() {
 
 void
 Game::BruteAI() {
+  init_board();
   
+  ofstream outFile;
+  string fileName;
+  cout << "Name output file: " << endl;
+  getline(cin, fileName);
+  outFile.open(fileName);
+  
+  while (!game_over()) {
+    print_board();
+    if (this->board != swipe(DOWN, this->board))
+      this->board = swipe(DOWN, this->board);
+    else if (this->board != swipe(RIGHT, this->board))
+      this->board = swipe(RIGHT, this->board);
+    else if (this->board != swipe(LEFT, this->board))
+      this->board = swipe(LEFT, this->board);
+    else if (this->board != swipe(UP, this->board))
+      this->board = swipe(UP, this->board);
+    
+    ++this->moves;
+    insert_rand();
+  }
+  
+  print_fin();
+  
+  outFile << os.str() << flush;
+  outFile.close();
 }
 
 void
 Game::AI() {
   init_board();
   
+  ofstream outFile;
+  string fileName;
+  cout << "Name output file: " << endl;
+  getline(cin, fileName);
+  outFile.open(fileName);
+  
   Direction next_move;
-  board_t new_board;
   while (!game_over()) {
-    next_move = get_best_move(this->board);
-    new_board = swipe(next_move, this->board);
-    insert_rand();
     print_board();
+    next_move = get_move(this->board);
+    this->board = swipe(next_move, this->board);
+    ++this->moves;
+    insert_rand();
   }  
   
-  cout << "GAME OVER!!\nFinal Score: " << get_score() << ", Max Tile: " << get_max_tile() << "\n";
-  print_board();
+  print_fin();
+  
+  outFile << os.str() << flush;
+  outFile.close();
 }
 
 Direction
-Game::get_best_move(board_t board) {
-  Direction dir;
+Game::get_move(board_t current_board) {
+  Direction best_move = UP;
   
-  if (board) dir = UP;
-  else dir = DOWN;
-  return dir;
+  unsigned depth = std::max(num_unique(), 3);
+  
+  double up_score    = score_swipe(UP, current_board, depth);
+  double down_score  = score_swipe(DOWN, current_board, depth);
+  double left_score  = score_swipe(LEFT, current_board, depth);
+  double right_score = score_swipe(RIGHT, current_board, depth);
+  
+  if (down_score > up_score) best_move = DOWN;
+  if (left_score > down_score) best_move = LEFT;
+  if (right_score > left_score) best_move = RIGHT;
+  
+  return best_move;
+}
+
+double
+Game::score_swipe(Direction dir, board_t current_board, int depth) {
+  if (current_board == swipe(dir, current_board)) return -1;
+  
+  
+  return current_board + depth;
 }
 
