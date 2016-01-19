@@ -12,6 +12,6 @@ This version is used primarily for code debugging and running it fast! There are
 ### Javascript Version: 
 This version is used because it is good looking. CSS and Javascript base came from https://github.com/gabrielecirulli/2048. AI came from C++ source code from the C++ version but converted to Javascript using Emscripten
 
-### UNDER CONSTRUCTION!!
+#### UNDER CONSTRUCTION!!
 
 Have fun!!
