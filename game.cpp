@@ -336,12 +336,19 @@ Direction
 Game::get_move(board_t current_board) {
   Direction best_move = UP;
   
-  unsigned depth = std::min(std::max(num_unique(), 3), 9);
+  this->search_depth = std::min(std::max(num_unique(), 3), 9);
   
-  double up_score    = score_swipe(UP, current_board, depth);
-  double down_score  = score_swipe(DOWN, current_board, depth);
-  double left_score  = score_swipe(LEFT, current_board, depth);
-  double right_score = score_swipe(RIGHT, current_board, depth);
+  cout << "search_depth = " << this->search_depth << endl;
+  
+  double up_score = 0;
+  double down_score = 0;
+  double left_score = 0;
+  double right_score = 0;
+  
+  if (current_board != swipe(UP, current_board)) up_score = expect(UP, current_board);
+  if (current_board != swipe(DOWN, current_board)) down_score  = expect(DOWN, current_board);
+  if (current_board != swipe(LEFT, current_board)) left_score  = expect(LEFT, current_board);
+  if (current_board != swipe(RIGHT, current_board)) right_score = expect(RIGHT, current_board);
   
   if (down_score > up_score) best_move = DOWN;
   if (left_score > down_score) best_move = LEFT;
@@ -350,11 +357,56 @@ Game::get_move(board_t current_board) {
   return best_move;
 }
 
-double
-Game::score_swipe(Direction dir, board_t current_board, int depth) {
-  if (current_board == swipe(dir, current_board)) return -1;
+double inline
+Game::expect(board_t current_board, double prob) {
+  if (prob < 0.001 || this->current_depth >= this->search_depth)
+    return score_board(current_board);
   
+  const unordered_map<board_t, pair<uint8_t, double>>::iterator& it = this->look_up.find(current_board);
+  if (it != look_up.end()) return it->second.second;
   
-  return current_board + depth;
+  unsigned num_open = num_empty(current_board);
+  prob /= num_open;
+  
+  double score = 0.0;
+  board_t tmp = current_board;
+  board_t tile = 1;
+  while (tile) {
+    if ((tmp & iso_tile) == 0) {
+      score += imax(current_board |  tile      , prob*0.9)*0.9;
+      score += imax(current_board | (tile << 1), prob*0.1)*0.1;
+    }
+    tmp >>= 4;
+    tile <<= 4;
+  }
+  score /= num_open;
+  
+  this->look_up.insert({current_board, {this->current_depth, score}});
+  
+  return score;
 }
+
+double inline
+Game::imax(board_t current_board, double prob) {
+  double best = 0.0;
+  this->current_depth++;
+  Direction move;
+  for (int dirInt = 0; dirInt < 4; ++dirInt) {
+    move = static_cast<direction_t>(dirInt);
+    board_t new_board = swipe(move, current_board);
+    
+    if (current_board != new_board) {
+      best = std::max(best, expect(new_board, prob));
+    }
+  }
+  this->current_depth--;
+  
+  return best;
+}
+
+double inline
+Game::score_board(board_t current_board) {
+  return current_board;
+}
+
 

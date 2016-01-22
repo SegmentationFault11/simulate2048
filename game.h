@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <fstream>
 #include <bitset>
+#include <unordered_map>
 
 
 using namespace std;
@@ -37,14 +38,16 @@ private:
   ostringstream os;
   
 //--------------------RUNTIME VARIABLES--------------------
-  unsigned search_depth  = 3;
-  unsigned current_depth = 0;
+  uint8_t search_depth  = 3;
+  uint8_t current_depth = 0;
  
 public:
 //------------------------VARIABLES------------------------
   board_t board = 0;
   unsigned score_pen = 0;
   unsigned moves = 0;
+  
+  unordered_map<board_t, pair<uint8_t, double>> look_up;
   
 //----------------------CONSTRUCTORS-----------------------
   Game();
@@ -89,10 +92,13 @@ public:
   
   void AI();
 
-//------------------------SIMULATORS------------------------
+//------------------------HEURISTICS------------------------
 	Direction get_move(board_t current_board);
   
-  double score_swipe(Direction dir, board_t current_board, int depth);
+  double expect(board_t current_board, double prob);
   
+  double imax(board_t current_board, double prob);
+  
+  double score_board(board_t current_board);
 };
 #endif
