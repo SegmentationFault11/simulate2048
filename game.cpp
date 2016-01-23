@@ -2,6 +2,13 @@
 
 Game::Game() {
   srand((unsigned)time(NULL));
+  cout << "set" << endl;
+  for (uint64_t i = 0; i < UINT64_MAX; ++i) {
+    int j = 2;
+    j <<= 2;
+    if (i%UINT32_MAX == 0) cout << i << endl;
+  }
+  cout << "set done" << endl;
   
   board_t tile[4];
   for (row_t val = 0; val < UINT16_MAX; ++val) {
@@ -337,8 +344,6 @@ Game::get_move(board_t current_board) {
   Direction best_move = UP;
   
   this->search_depth = std::min(std::max(num_unique(), 3), 9);
-  
-  cout << "search_depth = " << this->search_depth << endl;
   
   double up_score = 0;
   double down_score = 0;
