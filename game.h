@@ -27,6 +27,13 @@ using namespace std;
 //| 3 | 2 | 1 | 0 |
 //-----------------
 
+static const float LOST_PENALTY = 200000.0;
+static const float MONOTONICITY_POWER = 4.0;
+static const float MONOTONICITY_WEIGHT = 47.0;
+static const float SUM_POWER = 3.5;
+static const float SUM_WEIGHT = 11.0;
+static const float MERGES_WEIGHT = 700.0;
+static const float EMPTY_WEIGHT = 270.0;
 
 typedef uint64_t board_t;
 typedef uint16_t row_t;
@@ -46,6 +53,7 @@ class Game {
 private:
 //----------------------LOOKUP TABLES----------------------
   unsigned score_row    [0x10000];
+  float   heuri_row    [0x10000];
   row_t    collapseLeft [0x10000];
   row_t    collapseRight[0x10000];
   board_t  collapseUp   [0x10000];
@@ -57,6 +65,7 @@ private:
 //--------------------RUNTIME VARIABLES--------------------
   uint8_t search_depth  = 3;
   uint8_t current_depth = 0;
+  unsigned current_max_tile = 0;
  
 public:
 //------------------------VARIABLES------------------------
@@ -64,7 +73,7 @@ public:
   unsigned score_pen = 0;
   unsigned moves = 0;
   
-  unordered_map<board_t, pair<uint8_t, double>> look_up;
+  unordered_map<board_t, pair<uint8_t, float>> look_up;
   
 //----------------------CONSTRUCTORS-----------------------
   Game();
@@ -90,9 +99,9 @@ public:
   
   int num_unique();
   
-  board_t swipe(Direction dir, board_t current_board);
+  board_t swipe(direction_t dir, board_t current_board);
   
-  unsigned num_empty(board_t current_board);
+  unsigned get_empty(board_t current_board);
   
   bool insert_rand();
   
@@ -110,12 +119,12 @@ public:
   void AI();
 
 //------------------------HEURISTICS------------------------
-	Direction get_move(board_t current_board);
+	void execute_best_move(board_t current_board);
   
-  double expect(board_t current_board, double prob);
+  float expect(board_t current_board, float prob);
   
-  double imax(board_t current_board, double prob);
+  float imax(board_t current_board, float prob);
   
-  double score_board(board_t current_board);
+  float score_board(board_t current_board);
 };
 #endif

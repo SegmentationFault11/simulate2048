@@ -2,16 +2,9 @@
 
 Game::Game() {
   srand((unsigned)time(NULL));
-  cout << "set" << endl;
-  for (uint64_t i = 0; i < UINT64_MAX; ++i) {
-    int j = 2;
-    j <<= 2;
-    if (i%UINT32_MAX == 0) cout << i << endl;
-  }
-  cout << "set done" << endl;
   
   board_t tile[4];
-  for (row_t val = 0; val < UINT16_MAX; ++val) {
+  for (unsigned val = 0; val < 0x10000; ++val) {
     tile[0] = val & iso_tile;
     tile[1] = (val >> 4)  & iso_tile;
     tile[2] = (val >> 8)  & iso_tile;
@@ -20,8 +13,50 @@ Game::Game() {
     for (int i = 0; i < 4; ++i)
       if (tile[i] > 1) score_row[val] += (tile[i] - 1)*(1 << tile[i]);
     
-    for (int i = 0; i < 3; ++i) {
-      int j = 0;
+    // Heuristic score
+    float sum = 0;
+    unsigned empty = 0;
+    unsigned merges = 0;
+    
+    unsigned prev = 0;
+    unsigned counter = 0;
+    for (size_t i = 0; i < 4; ++i) {
+      unsigned rank = (unsigned)tile[i];
+      sum += pow(rank, SUM_POWER);
+      if (rank == 0) {
+        empty++;
+      } else {
+        if (prev == rank) {
+          counter += rank;
+        } else if (counter > 0) {
+          merges += 1 + counter;
+          counter = 0;
+        }
+        prev = rank;
+      }
+    }
+    if (counter > 0) {
+      merges += 1 + counter;
+    }
+    
+    float monotonicity_left = 0;
+    float monotonicity_right = 0;
+    for (int i = 1; i < 4; ++i) {
+      if (tile[i-1] > tile[i]) {
+        monotonicity_left += pow(tile[i-1], MONOTONICITY_POWER) - pow(tile[i], MONOTONICITY_POWER);
+      } else {
+        monotonicity_right += pow(tile[i], MONOTONICITY_POWER) - pow(tile[i-1], MONOTONICITY_POWER);
+      }
+    }
+    
+    heuri_row[val] = LOST_PENALTY +
+    								 EMPTY_WEIGHT * empty +
+                     MERGES_WEIGHT * merges -
+                     MONOTONICITY_WEIGHT * std::min(monotonicity_left, monotonicity_right) -
+                     SUM_WEIGHT * sum;
+    
+    for (size_t i = 0; i < 3; ++i) {
+      size_t j = 0;
       
       for (j = i + 1; j < 4; ++j) if (tile[j] != 0) break;
       
@@ -123,7 +158,7 @@ Game::get_score() {
          this->score_pen;
 }
 
-int
+inline int
 Game::num_unique() {
   uint16_t present = 0;
   for (board_t current_board = this->board; current_board; current_board >>= 4)
@@ -131,7 +166,7 @@ Game::num_unique() {
   
   int count;
   for (count = 0; present; ++count) present &= present - 1;
-  return --count;
+  return std::max(count-2, 3);
 }
 
 inline board_t
@@ -179,7 +214,7 @@ Game::swipe(Direction dir, board_t current_board) {
 }
 
 inline unsigned
-Game::num_empty(board_t current_board) {
+Game::get_empty(board_t current_board) {
   unsigned num = 0;
   for (int i = 0; i < 16; ++i, current_board >>= 4) num += ((current_board & iso_tile)) ? 0 : 1;
   return num;
@@ -319,16 +354,14 @@ Game::AI() {
   init_board();
   
   ofstream outFile;
-  string fileName;
-  cout << "Name output file: " << endl;
-  getline(cin, fileName);
-  outFile.open(fileName);
+  string fileName = "out.txt";
+//  cout << "Name output file: " << endl;
+//  getline(cin, fileName);
+//  outFile.open(fileName);
   
-  Direction next_move;
   while (!game_over()) {
     print_board();
-    next_move = get_move(this->board);
-    this->board = swipe(next_move, this->board);
+    execute_best_move(this->board);
     ++this->moves;
     insert_rand();
   }  
@@ -339,62 +372,76 @@ Game::AI() {
   outFile.close();
 }
 
-Direction
-Game::get_move(board_t current_board) {
-  Direction best_move = UP;
+inline void
+Game::execute_best_move(board_t current_board) {
+  Direction best_move;
   
-  this->search_depth = std::min(std::max(num_unique(), 3), 9);
+  this->search_depth = std::min(std::max(num_unique()-2, 3), 8);
   
-  double up_score = 0;
-  double down_score = 0;
-  double left_score = 0;
-  double right_score = 0;
+  float up_score = 0;
+  float down_score = 0;
+  float left_score = 0;
+  float right_score = 0;
   
-  if (current_board != swipe(UP, current_board)) up_score = expect(UP, current_board);
-  if (current_board != swipe(DOWN, current_board)) down_score  = expect(DOWN, current_board);
-  if (current_board != swipe(LEFT, current_board)) left_score  = expect(LEFT, current_board);
-  if (current_board != swipe(RIGHT, current_board)) right_score = expect(RIGHT, current_board);
+  if (current_board != swipe(UP, current_board))
+    up_score = expect(swipe(UP, current_board), 1);
+  if (current_board != swipe(DOWN, current_board))
+    down_score  = expect(swipe(DOWN, current_board), 1);
+  if (current_board != swipe(LEFT, current_board))
+    left_score  = expect(swipe(LEFT, current_board), 1);
+  if (current_board != swipe(RIGHT, current_board))
+    right_score = expect(swipe(RIGHT, current_board), 1);
   
-  if (down_score > up_score) best_move = DOWN;
-  if (left_score > down_score) best_move = LEFT;
-  if (right_score > left_score) best_move = RIGHT;
+  float best_score = std::max(up_score, down_score);
+  best_score = std::max(best_score, left_score);
+  best_score = std::max(best_score, right_score);
   
-  return best_move;
+  if (best_score == up_score) best_move = UP;
+  else if (best_score == down_score) best_move = DOWN;
+  else if (best_score == left_score) best_move = LEFT;
+  else best_move = RIGHT;
+  
+  this->board = swipe(best_move, this->board);
+  unsigned max_tile = get_max_tile();
+  if (max_tile > current_max_tile) this->current_max_tile = max_tile;
+  this->look_up.clear();
 }
 
-double inline
-Game::expect(board_t current_board, double prob) {
-  if (prob < 0.001 || this->current_depth >= this->search_depth)
+inline float
+Game::expect(board_t current_board, float prob) {
+  if (prob < 0.0001 || this->search_depth < this->current_depth) {
     return score_board(current_board);
+  }
   
-  const unordered_map<board_t, pair<uint8_t, double>>::iterator& it = this->look_up.find(current_board);
+  const unordered_map<board_t, pair<uint8_t, float>>::iterator& it = this->look_up.find(current_board);
   if (it != look_up.end()) return it->second.second;
   
-  unsigned num_open = num_empty(current_board);
-  prob /= num_open;
+  unsigned num_empty = get_empty(current_board);
+  prob /= num_empty;
   
-  double score = 0.0;
-  board_t tmp = current_board;
+  float score = 0.0;
+  board_t new_board = current_board;
   board_t tile = 1;
   while (tile) {
-    if ((tmp & iso_tile) == 0) {
+    if (!(new_board & iso_tile)) {
       score += imax(current_board |  tile      , prob*0.9)*0.9;
       score += imax(current_board | (tile << 1), prob*0.1)*0.1;
     }
-    tmp >>= 4;
+    new_board >>= 4;
     tile <<= 4;
   }
-  score /= num_open;
-  
+  score /= num_empty;
+
   this->look_up.insert({current_board, {this->current_depth, score}});
   
   return score;
 }
 
-double inline
-Game::imax(board_t current_board, double prob) {
-  double best = 0.0;
-  this->current_depth++;
+inline float
+Game::imax(board_t current_board, float prob) {
+  float best = 0.0;
+  ++this->current_depth;
+  
   Direction move;
   for (int dirInt = 0; dirInt < 4; ++dirInt) {
     move = static_cast<direction_t>(dirInt);
@@ -404,14 +451,21 @@ Game::imax(board_t current_board, double prob) {
       best = std::max(best, expect(new_board, prob));
     }
   }
-  this->current_depth--;
+  --this->current_depth;
   
   return best;
 }
 
-double inline
+inline float
 Game::score_board(board_t current_board) {
-  return current_board;
+  float score = heuri_row[(current_board >>  0) & iso_row] +
+                heuri_row[(current_board >> 16) & iso_row] +
+                heuri_row[(current_board >> 32) & iso_row] +
+                heuri_row[(current_board >> 48) & iso_row] +
+                heuri_row[(transpose(current_board) >>  0) & iso_row] +
+                heuri_row[(transpose(current_board) >> 16) & iso_row] +
+                heuri_row[(transpose(current_board) >> 32) & iso_row] +
+                heuri_row[(transpose(current_board) >> 48) & iso_row];
+  return score;
 }
-
 
