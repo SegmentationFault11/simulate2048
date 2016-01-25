@@ -10,10 +10,10 @@
 # Name the executable
 	EXECUTABLE = 2048
 
-compilefile:
+file:
 	$(CXX) $(FLAGS) $(OBJECTS) -o $(EXECUTABLE)
 
-compileprint:
+print:
 	$(CXX) $(FLAGS) $(OBJECTS) -D OUT -o $(EXECUTABLE)
 
 clean:
