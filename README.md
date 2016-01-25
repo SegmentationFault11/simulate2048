@@ -8,15 +8,20 @@ No where on the internet can you find an algorithm that gets to 16384 more than 
 
 ### C++ Version
 This version is used primarily for code debugging and running it fast! Compile using:
-	make print
+
+make print
+
 to print the state of the game every time the AI makes a move. The program will write the output to a file you specify at the end. Compile using:
-	make file
+
+make file
+
 to output only to the file. (WARNING: if the game goes beyond the 16384 tile, the program might not end for 30 minutes)
 
 There are 3 modes to this game: Human, Bruteforce, and SmartAI. The human version allows you to control the game yourself. The brute force version implements a very simple AI. SmartAI uses Expectimax and is the best AI ever to run this game!
 
 Run the program using:
-	./2048 {flag}
+
+./2048 {flag}
 {flag} = -h or --human
 {flag} = -b or --brute
 {flag} = -c or --computer
