@@ -22,6 +22,7 @@ There are 3 modes to this game: Human, Bruteforce, and SmartAI. The human versio
 Run the program using:
 
 ./2048 {flag}
+
 {flag} = -h or --human
 {flag} = -b or --brute
 {flag} = -c or --computer
