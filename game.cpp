@@ -3,6 +3,13 @@
 Game::Game() {
   srand((unsigned)time(NULL));
   
+  this->look_up.resize(LOOK_UP_DEPTH);
+  
+  for (size_t i = 0; i < LOOK_UP_DEPTH; ++i) {
+    lookup_t* look_up_table = new lookup_t;
+    look_up[i] = look_up_table;
+  }
+  
   board_t tile[4];
   for (unsigned val = 0; val < 0x10000; ++val) {
     tile[0] = val & iso_tile;
@@ -378,6 +385,9 @@ Game::execute_best_move(board_t current_board) {
   
   this->search_depth = std::min(std::max(num_unique()-2, 3), 8);
   
+  lookup_t* look_up_table = new lookup_t;
+  this->look_up.push_front(look_up_table);
+  
   float up_score = 0;
   float down_score = 0;
   float left_score = 0;
@@ -404,7 +414,10 @@ Game::execute_best_move(board_t current_board) {
   this->board = swipe(best_move, this->board);
   unsigned max_tile = get_max_tile();
   if (max_tile > current_max_tile) this->current_max_tile = max_tile;
-  this->look_up.clear();
+  
+  delete this->look_up.back();
+  this->look_up.back() = nullptr;
+  this->look_up.pop_back();
 }
 
 inline float
@@ -413,9 +426,17 @@ Game::expect(board_t current_board, float prob) {
     return score_board(current_board);
   }
   
-  const unordered_map<board_t, pair<uint8_t, float>>::iterator& it = this->look_up.find(current_board);
-  if (it != look_up.end()) return it->second.second;
-  
+//  const unordered_map<board_t, pair<uint8_t, float>>::iterator& it = this->look_up.find(current_board);
+//  if (it != look_up.end()) return it->second.second;
+  //cout << "sta" << endl;
+  for (size_t i = 0; i < LOOK_UP_DEPTH; ++i) {
+    //cout << "1" << endl;
+    const lookup_t::iterator& it = this->look_up[i]->find(current_board);
+    //cout << "2" << endl;
+    if (it != look_up[i]->end()) return it->second.second;
+    //cout << "3" << endl;
+  }
+  //cout << "fin" << endl;
   unsigned num_empty = get_empty(current_board);
   prob /= num_empty;
   
@@ -432,7 +453,7 @@ Game::expect(board_t current_board, float prob) {
   }
   score /= num_empty;
 
-  this->look_up.insert({current_board, {this->current_depth, score}});
+  this->look_up.front()->insert({current_board, {this->current_depth, score}});
   
   return score;
 }

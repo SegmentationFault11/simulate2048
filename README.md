@@ -1,6 +1,6 @@
 ## INTRODUCTION
 
-Welcome to the 2048 simulator, in this you will find my attempt to use expectimax to achieve the 16384 block 100% of the time. Achieves the 2048 tile in 39 seconds!
+Welcome to the 2048 simulator, in this you will find my attempt to use expectimax to achieve the 16384 block 100% of the time. Achieves the 2048 tile in 9 seconds!
 
 No where on the internet can you find an algorithm that gets to 16384 more than 50% of the time using less than 10 look ahead steps. 
 

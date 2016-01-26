@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstdio>
 #include <vector>
+#include <deque>
 #include <iomanip>
 #include <cstdlib>
 #include <sstream>
@@ -35,8 +36,11 @@ static const float SUM_WEIGHT = 11.0;
 static const float MERGES_WEIGHT = 700.0;
 static const float EMPTY_WEIGHT = 270.0;
 
+static const uint8_t LOOK_UP_DEPTH = 5;
+
 typedef uint64_t board_t;
 typedef uint16_t row_t;
+typedef unordered_map<board_t, pair<uint8_t, float>> lookup_t;
 
 typedef enum direction_t {UP, DOWN, LEFT, RIGHT} Direction;
 
@@ -53,7 +57,7 @@ class Game {
 private:
 //----------------------LOOKUP TABLES----------------------
   unsigned score_row    [0x10000];
-  float   heuri_row    [0x10000];
+  float    heuri_row    [0x10000];
   row_t    collapseLeft [0x10000];
   row_t    collapseRight[0x10000];
   board_t  collapseUp   [0x10000];
@@ -73,7 +77,7 @@ public:
   unsigned score_pen = 0;
   unsigned moves = 0;
   
-  unordered_map<board_t, pair<uint8_t, float>> look_up;
+  deque<lookup_t*> look_up;
   
 //----------------------CONSTRUCTORS-----------------------
   Game();
