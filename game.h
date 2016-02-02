@@ -17,16 +17,16 @@
 
 using namespace std;
 
-//board = 0x0123456789abcdef
-//-----------------
-//| f | e | d | c |
-//-----------------
-//| b | a | 9 | 8 |
-//-----------------
-//| 7 | 6 | 5 | 4 |
-//-----------------
-//| 3 | 2 | 1 | 0 |
-//-----------------
+// board = 0x0123456789abcdef
+// -----------------
+// | f | e | d | c |
+// -----------------
+// | b | a | 9 | 8 |
+// -----------------
+// | 7 | 6 | 5 | 4 |
+// -----------------
+// | 3 | 2 | 1 | 0 |
+// -----------------
 
 static const float LOST_PENALTY = 200000.0;
 static const float MONOTONICITY_POWER = 4.0;
@@ -47,11 +47,6 @@ typedef enum direction_t {UP, DOWN, LEFT, RIGHT} Direction;
 static const board_t iso_row   = 0xffff;
 static const board_t iso_col = 0x000f000f000f000f;
 static const row_t iso_tile  = 0x000f;
-
-//static const board_t mono1 = 0x0000 0000 0000 0000;
-//static const board_t mono2 = 0x0000 0000 0000 0000;
-//static const board_t mono3 = 0x0000 0000 0000 0000;
-//static const board_t mono4 = 0x0000 0000 0000 0000;
 
 class Game {
 private:

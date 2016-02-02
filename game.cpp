@@ -42,18 +42,15 @@ Game::Game() {
         prev = rank;
       }
     }
-    if (counter > 0) {
-      merges += 1 + counter;
-    }
+    if (counter > 0) merges += 1 + counter;
     
     float monotonicity_left = 0;
     float monotonicity_right = 0;
     for (int i = 1; i < 4; ++i) {
-      if (tile[i-1] > tile[i]) {
+      if (tile[i-1] > tile[i]) 
         monotonicity_left += pow(tile[i-1], MONOTONICITY_POWER) - pow(tile[i], MONOTONICITY_POWER);
-      } else {
+      else
         monotonicity_right += pow(tile[i], MONOTONICITY_POWER) - pow(tile[i-1], MONOTONICITY_POWER);
-      }
     }
     
     heuri_row[val] = LOST_PENALTY +
@@ -361,10 +358,6 @@ Game::AI() {
   init_board();
   
   ofstream outFile;
-  string fileName = "out.txt";
-//  cout << "Name output file: " << endl;
-//  getline(cin, fileName);
-//  outFile.open(fileName);
   
   while (!game_over()) {
     print_board();
@@ -375,6 +368,10 @@ Game::AI() {
   
   print_fin();
   
+  string fileName;
+  cout << "Name output file: " << endl;
+  getline(cin, fileName);
+  outFile.open(fileName);
   outFile << os.str() << flush;
   outFile.close();
 }
@@ -422,21 +419,14 @@ Game::execute_best_move(board_t current_board) {
 
 inline float
 Game::expect(board_t current_board, float prob) {
-  if (prob < 0.0001 || this->search_depth < this->current_depth) {
+  if (prob < 0.0001 || this->search_depth < this->current_depth) 
     return score_board(current_board);
-  }
   
-//  const unordered_map<board_t, pair<uint8_t, float>>::iterator& it = this->look_up.find(current_board);
-//  if (it != look_up.end()) return it->second.second;
-  //cout << "sta" << endl;
   for (size_t i = 0; i < LOOK_UP_DEPTH; ++i) {
-    //cout << "1" << endl;
     const lookup_t::iterator& it = this->look_up[i]->find(current_board);
-    //cout << "2" << endl;
     if (it != look_up[i]->end()) return it->second.second;
-    //cout << "3" << endl;
   }
-  //cout << "fin" << endl;
+
   unsigned num_empty = get_empty(current_board);
   prob /= num_empty;
   
@@ -468,9 +458,7 @@ Game::imax(board_t current_board, float prob) {
     move = static_cast<direction_t>(dirInt);
     board_t new_board = swipe(move, current_board);
     
-    if (current_board != new_board) {
-      best = std::max(best, expect(new_board, prob));
-    }
+    if (current_board != new_board) best = std::max(best, expect(new_board, prob));
   }
   --this->current_depth;
   
