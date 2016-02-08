@@ -359,15 +359,25 @@ Game::AI() {
   
   ofstream outFile;
   
+  //Run the game until gameover
   while (!game_over()) {
+    //Print current state
     print_board();
+
+    //Find and execute best move judging from the current state
     execute_best_move(this->board);
+
+    //Increment the number of moves
     ++this->moves;
+
+    //Insert a tile randomly on the board
     insert_rand();
   }  
   
+  //Print end result
   print_fin();
   
+  //Print result to a file
   string fileName;
   cout << "Name output file: " << endl;
   getline(cin, fileName);
@@ -376,20 +386,26 @@ Game::AI() {
   outFile.close();
 }
 
+//Find the best posible move and executes it
 inline void
 Game::execute_best_move(board_t current_board) {
   Direction best_move;
   
+  //Dynamically set the number of moves the program looks ahead
   this->search_depth = std::min(std::max(num_unique()-2, 3), 8);
   
+  //Set up look_up table to avoid recalculating scores
   lookup_t* look_up_table = new lookup_t;
   this->look_up.push_front(look_up_table);
   
+  //Initialising scores for each potiential move
   float up_score = 0;
   float down_score = 0;
   float left_score = 0;
   float right_score = 0;
   
+  //If a move can be made, calculate the score of that move
+  //Calls the recursive functions expect() and imax()
   if (current_board != swipe(UP, current_board))
     up_score = expect(swipe(UP, current_board), 1);
   if (current_board != swipe(DOWN, current_board))
@@ -399,40 +415,53 @@ Game::execute_best_move(board_t current_board) {
   if (current_board != swipe(RIGHT, current_board))
     right_score = expect(swipe(RIGHT, current_board), 1);
   
+  //Find the highest score out of the scores calculated for the moves
   float best_score = std::max(up_score, down_score);
   best_score = std::max(best_score, left_score);
   best_score = std::max(best_score, right_score);
   
+  //Find the direction of the move
   if (best_score == up_score) best_move = UP;
   else if (best_score == down_score) best_move = DOWN;
   else if (best_score == left_score) best_move = LEFT;
   else best_move = RIGHT;
   
+  //Executes the move
   this->board = swipe(best_move, this->board);
   unsigned max_tile = get_max_tile();
   if (max_tile > current_max_tile) this->current_max_tile = max_tile;
   
+  //Delete the look up table from 4 moves ago to prevent high memory usage
   delete this->look_up.back();
   this->look_up.back() = nullptr;
   this->look_up.pop_back();
 }
 
+//Calculates the heuristics score of a specific move
 inline float
 Game::expect(board_t current_board, float prob) {
+
+  //If the depth goes deeper than the depth previously set
+  //Or if the probability of finding the best answer is very low
+  //Return the heuristic score of the board
   if (prob < 0.0001 || this->search_depth < this->current_depth) 
     return score_board(current_board);
   
+  //Look through the look up tables to see if the score has been calculated before
   for (size_t i = 0; i < LOOK_UP_DEPTH; ++i) {
     const lookup_t::iterator& it = this->look_up[i]->find(current_board);
     if (it != look_up[i]->end()) return it->second.second;
   }
-
+  
+  //Adjust probability by the number of empty tiles
   unsigned num_empty = get_empty(current_board);
   prob /= num_empty;
   
   float score = 0.0;
   board_t new_board = current_board;
   board_t tile = 1;
+
+  //Branch off all the different moves possible from the current state
   while (tile) {
     if (!(new_board & iso_tile)) {
       score += imax(current_board |  tile      , prob*0.9)*0.9;
@@ -443,16 +472,21 @@ Game::expect(board_t current_board, float prob) {
   }
   score /= num_empty;
 
+  //Store the newly calculated score using the current state of the board as key
   this->look_up.front()->insert({current_board, {this->current_depth, score}});
   
   return score;
 }
 
+//Branch off every possible move and find the best one
 inline float
 Game::imax(board_t current_board, float prob) {
   float best = 0.0;
+
+  //Increment depth
   ++this->current_depth;
   
+  //Go through all possible moves
   Direction move;
   for (int dirInt = 0; dirInt < 4; ++dirInt) {
     move = static_cast<direction_t>(dirInt);
@@ -460,6 +494,8 @@ Game::imax(board_t current_board, float prob) {
     
     if (current_board != new_board) best = std::max(best, expect(new_board, prob));
   }
+
+  //Decrement depth
   --this->current_depth;
   
   return best;
