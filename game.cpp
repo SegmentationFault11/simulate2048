@@ -136,9 +136,9 @@ Game::transpose(board_t current_board) {
 inline unsigned
 Game::sum_board() {
   unsigned sum = (this->board >> 36) +
-  (this->board >> 24) & iso_row +
-  (this->board >> 12) & iso_row +
-  this->board & iso_row;
+  ((this->board >> 24) & iso_row) +
+  ((this->board >> 12) & iso_row) +
+  (this->board & iso_row);
   return sum;
 }
 
@@ -513,4 +513,5 @@ Game::score_board(board_t current_board) {
                 heuri_row[(transpose(current_board) >> 48) & iso_row];
   return score;
 }
+
 
