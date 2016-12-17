@@ -17,6 +17,8 @@
 #include <mutex>
 #include <condition_variable>
 
+#include "rw_lock.h"
+
 
 using namespace std;
 
@@ -68,6 +70,9 @@ private:
   uint8_t search_depth  = 3;
   uint8_t current_depth = 0;
   unsigned current_max_tile = 0;
+
+//--------------------------MUTEX--------------------------
+  RW_lock look_up_lock;
  
 public:
 //------------------------VARIABLES------------------------

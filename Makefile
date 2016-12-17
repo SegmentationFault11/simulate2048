@@ -5,7 +5,7 @@
 	FLAGS = -std=c++11 -Werror -Wall -Wextra -pedantic -O3
 
 # Put all files here
-	OBJECTS = simulate2048.cpp game.cpp 
+	OBJECTS = simulate2048.cpp game.cpp rw_lock.cpp
 
 # Name the executable
 	EXECUTABLE = 2048

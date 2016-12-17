@@ -461,8 +461,14 @@ Game::expect(board_t current_board, float prob) {
   
   //Look through the look up tables to see if the score has been calculated before
   for (size_t i = 0; i < LOOK_UP_DEPTH; ++i) {
+    if (i == 0) this->look_up_lock.read_lock();
     const lookup_t::iterator& it = this->look_up[i]->find(current_board);
-    if (it != look_up[i]->end()) return it->second.second;
+    if (it != look_up[i]->end()) {
+      float rst = it->second.second;
+      if (i == 0) this->look_up_lock.read_unlock();
+      return rst;
+    }
+    if (i == 0) this->look_up_lock.read_unlock();
   }
   
   //Adjust probability by the number of empty tiles
@@ -485,7 +491,9 @@ Game::expect(board_t current_board, float prob) {
   score /= num_empty;
 
   //Store the newly calculated score using the current state of the board as key
+  this->look_up_lock.write_lock();
   this->look_up.front()->insert({current_board, {this->current_depth, score}});
+  this->look_up_lock.write_unlock();
   
   return score;
 }
