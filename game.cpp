@@ -412,22 +412,33 @@ Game::execute_best_move(board_t current_board) {
   board_t left_board = swipe(LEFT, current_board);
   board_t right_board = swipe(RIGHT, current_board);
 
+  thread up_th;
+  thread down_th;
+  thread left_th;
+  thread right_th;
+
   if (current_board != up_board) {
-    thread up_th(wrapper, up_board, &up_score, this);
-    up_th.join();
+    up_th = thread(wrapper, up_board, &up_score, this);
   }
   if (current_board != down_board) {
-    thread down_th(wrapper, down_board, &down_score, this);
-    down_th.join();
+    down_th = thread(wrapper, down_board, &down_score, this);
   }
   if (current_board != left_board) {
-    thread left_th(wrapper, left_board, &left_score, this);
-    left_th.join();
+    left_th = thread(wrapper, left_board, &left_score, this);
   }
   if (current_board != right_board) {
-    thread right_th(wrapper, right_board, &right_score, this);
-    right_th.join();
+    right_th = thread(wrapper, right_board, &right_score, this);
   }
+  
+  if (up_th.joinable()) up_th.join();
+  if (down_th.joinable()) down_th.join();
+  if (left_th.joinable()) left_th.join();
+  if (right_th.joinable()) right_th.join();
+
+  cout << up_score << endl;
+  cout << down_score << endl;
+  cout << left_score << endl;
+  cout << right_score << endl;
   
   //Find the highest score out of the scores calculated for the moves
   float best_score = std::max(up_score, down_score);
