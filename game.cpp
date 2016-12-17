@@ -434,11 +434,6 @@ Game::execute_best_move(board_t current_board) {
   if (down_th.joinable()) down_th.join();
   if (left_th.joinable()) left_th.join();
   if (right_th.joinable()) right_th.join();
-
-  cout << up_score << endl;
-  cout << down_score << endl;
-  cout << left_score << endl;
-  cout << right_score << endl;
   
   //Find the highest score out of the scores calculated for the moves
   float best_score = std::max(up_score, down_score);
@@ -462,12 +457,12 @@ Game::execute_best_move(board_t current_board) {
 
 //Calculates the heuristics score of a specific move
 inline float
-Game::expect(board_t current_board, float prob) {
+Game::expect(board_t current_board, float prob, int depth) {
 
   //If the depth goes deeper than the depth previously set
   //Or if the probability of finding the best answer is very low
   //Return the heuristic score of the board
-  if (prob < 0.0001 || this->search_depth < this->current_depth) 
+  if (prob < 0.0001 || this->search_depth < depth) 
     return score_board(current_board);
   
   //Look through the look up tables to see if the score has been calculated before
@@ -475,7 +470,7 @@ Game::expect(board_t current_board, float prob) {
     if (i == 0) this->look_up_lock.read_lock();
     const lookup_t::iterator& it = this->look_up[i]->find(current_board);
     if (it != look_up[i]->end()) {
-      float rst = it->second.second;
+      float rst = it->second;
       if (i == 0) this->look_up_lock.read_unlock();
       return rst;
     }
@@ -493,8 +488,8 @@ Game::expect(board_t current_board, float prob) {
   //Branch off all the different moves possible from the current state
   while (tile) {
     if (!(new_board & iso_tile)) {
-      score += imax(current_board |  tile      , prob*0.9)*0.9;
-      score += imax(current_board | (tile << 1), prob*0.1)*0.1;
+      score += imax(current_board |  tile      , prob*0.9, depth)*0.9;
+      score += imax(current_board | (tile << 1), prob*0.1, depth)*0.1;
     }
     new_board >>= 4;
     tile <<= 4;
@@ -503,7 +498,7 @@ Game::expect(board_t current_board, float prob) {
 
   //Store the newly calculated score using the current state of the board as key
   this->look_up_lock.write_lock();
-  this->look_up.front()->insert({current_board, {this->current_depth, score}});
+  this->look_up.front()->insert({current_board, score});
   this->look_up_lock.write_unlock();
   
   return score;
@@ -511,11 +506,8 @@ Game::expect(board_t current_board, float prob) {
 
 //Branch off every possible move and find the best one
 inline float
-Game::imax(board_t current_board, float prob) {
+Game::imax(board_t current_board, float prob, int depth) {
   float best = 0.0;
-
-  //Increment depth
-  ++this->current_depth;
   
   //Go through all possible moves
   Direction move;
@@ -523,11 +515,8 @@ Game::imax(board_t current_board, float prob) {
     move = static_cast<direction_t>(dirInt);
     board_t new_board = swipe(move, current_board);
     
-    if (current_board != new_board) best = std::max(best, expect(new_board, prob));
+    if (current_board != new_board) best = std::max(best, expect(new_board, prob, depth + 1));
   }
-
-  //Decrement depth
-  --this->current_depth;
   
   return best;
 }
@@ -546,5 +535,5 @@ Game::score_board(board_t current_board) {
 }
 
 void wrapper(board_t current_board, float *score, Game *game) {
-  *score = game->expect(current_board, 1);
+  *score = game->expect(current_board, 1, 0);
 }

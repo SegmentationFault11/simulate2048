@@ -45,7 +45,7 @@ static const uint8_t LOOK_UP_DEPTH = 5;
 
 typedef uint64_t board_t;
 typedef uint16_t row_t;
-typedef unordered_map<board_t, pair<uint8_t, float>> lookup_t;
+typedef unordered_map<board_t, float> lookup_t;
 
 typedef enum direction_t {UP, DOWN, LEFT, RIGHT} Direction;
 
@@ -128,9 +128,9 @@ public:
 //------------------------HEURISTICS------------------------
 	void execute_best_move(board_t current_board);
   
-  float expect(board_t current_board, float prob);
+  float expect(board_t current_board, float prob, int depth);
   
-  float imax(board_t current_board, float prob);
+  float imax(board_t current_board, float prob, int depth);
   
   float score_board(board_t current_board);
 
