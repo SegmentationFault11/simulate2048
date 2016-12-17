@@ -516,4 +516,6 @@ Game::score_board(board_t current_board) {
   return score;
 }
 
-
+void Game::wrapper(board_t current_board, float *score) {
+  score = expect(current_board, 1);
+}
