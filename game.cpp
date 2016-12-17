@@ -389,7 +389,6 @@ Game::AI() {
 //Find the best posible move and executes it
 inline void
 Game::execute_best_move(board_t current_board) {
-  Direction best_move;
   
   //Dynamically set the number of moves the program looks ahead
   this->search_depth = std::min(std::max(num_unique()-2, 3), 8);
@@ -406,14 +405,19 @@ Game::execute_best_move(board_t current_board) {
   
   //If a move can be made, calculate the score of that move
   //Calls the recursive functions expect() and imax()
-  if (current_board != swipe(UP, current_board))
-    up_score = expect(swipe(UP, current_board), 1);
-  if (current_board != swipe(DOWN, current_board))
-    down_score  = expect(swipe(DOWN, current_board), 1);
-  if (current_board != swipe(LEFT, current_board))
-    left_score  = expect(swipe(LEFT, current_board), 1);
-  if (current_board != swipe(RIGHT, current_board))
-    right_score = expect(swipe(RIGHT, current_board), 1);
+  board_t up_board = swipe(UP, current_board);
+  board_t down_board = swipe(DOWN, current_board);
+  board_t left_board = swipe(LEFT, current_board);
+  board_t right_board = swipe(RIGHT, current_board);
+
+  if (current_board != up_board)
+    up_score = expect(up_board, 1);
+  if (current_board != down_board)
+    down_score  = expect(down_board, 1);
+  if (current_board != left_board)
+    left_score  = expect(left_board, 1);
+  if (current_board != right_board)
+    right_score = expect(right_board, 1);
   
   //Find the highest score out of the scores calculated for the moves
   float best_score = std::max(up_score, down_score);
@@ -421,13 +425,11 @@ Game::execute_best_move(board_t current_board) {
   best_score = std::max(best_score, right_score);
   
   //Find the direction of the move
-  if (best_score == up_score) best_move = UP;
-  else if (best_score == down_score) best_move = DOWN;
-  else if (best_score == left_score) best_move = LEFT;
-  else best_move = RIGHT;
+  if (best_score == up_score) this->board = up_board;
+  else if (best_score == down_score) this->board = down_board;
+  else if (best_score == left_score) this->board = left_board;
+  else this->board = right_board;
   
-  //Executes the move
-  this->board = swipe(best_move, this->board);
   unsigned max_tile = get_max_tile();
   if (max_tile > current_max_tile) this->current_max_tile = max_tile;
   

@@ -128,5 +128,8 @@ public:
   float imax(board_t current_board, float prob);
   
   float score_board(board_t current_board);
+
+//----------------------THREAD_WRAPPER----------------------
+  //void wrapper(board_t current_board, float prob)
 };
 #endif
