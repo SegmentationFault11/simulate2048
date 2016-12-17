@@ -411,13 +411,13 @@ Game::execute_best_move(board_t current_board) {
   board_t right_board = swipe(RIGHT, current_board);
 
   if (current_board != up_board)
-    up_score = expect(up_board, 1);
+    wrapper(up_board, &up_score);
   if (current_board != down_board)
-    down_score  = expect(down_board, 1);
+    wrapper(down_board, &down_score);
   if (current_board != left_board)
-    left_score  = expect(left_board, 1);
+    wrapper(left_board, &left_score);
   if (current_board != right_board)
-    right_score = expect(right_board, 1);
+    wrapper(right_board, &right_score);
   
   //Find the highest score out of the scores calculated for the moves
   float best_score = std::max(up_score, down_score);
@@ -517,5 +517,5 @@ Game::score_board(board_t current_board) {
 }
 
 void Game::wrapper(board_t current_board, float *score) {
-  score = expect(current_board, 1);
+  *score = expect(current_board, 1);
 }
