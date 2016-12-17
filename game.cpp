@@ -1,5 +1,7 @@
 #include "game.h"
 
+void wrapper(board_t current_board, float *score, Game *game);
+
 Game::Game() {
   srand((unsigned)time(NULL));
   
@@ -410,14 +412,22 @@ Game::execute_best_move(board_t current_board) {
   board_t left_board = swipe(LEFT, current_board);
   board_t right_board = swipe(RIGHT, current_board);
 
-  if (current_board != up_board)
-    wrapper(up_board, &up_score);
-  if (current_board != down_board)
-    wrapper(down_board, &down_score);
-  if (current_board != left_board)
-    wrapper(left_board, &left_score);
-  if (current_board != right_board)
-    wrapper(right_board, &right_score);
+  if (current_board != up_board) {
+    thread up_th(wrapper, up_board, &up_score, this);
+    up_th.join();
+  }
+  if (current_board != down_board) {
+    thread down_th(wrapper, down_board, &down_score, this);
+    down_th.join();
+  }
+  if (current_board != left_board) {
+    thread left_th(wrapper, left_board, &left_score, this);
+    left_th.join();
+  }
+  if (current_board != right_board) {
+    thread right_th(wrapper, right_board, &right_score, this);
+    right_th.join();
+  }
   
   //Find the highest score out of the scores calculated for the moves
   float best_score = std::max(up_score, down_score);
@@ -516,6 +526,6 @@ Game::score_board(board_t current_board) {
   return score;
 }
 
-void Game::wrapper(board_t current_board, float *score) {
-  *score = expect(current_board, 1);
+void wrapper(board_t current_board, float *score, Game *game) {
+  *score = game->expect(current_board, 1);
 }
